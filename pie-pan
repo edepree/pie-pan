@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat <<EOF
+Usage: pie-pan [OPTIONS]
+
+Run the pie-pan container from the current directory.
+
+Options:
+  -n, --name NAME         Container name suffix (creates pie-pan-NAME)
+  -r, --router VALUE      Set MODEL_ROUTER inside the container (overrides PIE_PAN_MODEL_ROUTER)
+  -c, --container IMAGE   Container image to run
+  -d, --detached          Run container in background (sleep infinity)
+  -h, --help              Show this help message and exit
+
+Environment:
+  PIE_PAN_MODEL_ROUTER    Default router to pass as MODEL_ROUTER inside the container
+
+Examples:
+  pie-pan
+  pie-pan -n my-project
+  pie-pan --detached
+  pie-pan -r openai
+  pie-pan -c ghcr.io/example/pie-pan:latest --detached
+  PIE_PAN_MODEL_ROUTER=anthropic pie-pan
+EOF
+    exit 0
+}
+
+# parse arguments
+NAME=""
+
+# default from environment; CLI flag can override
+ROUTER="${PIE_PAN_MODEL_ROUTER:-}"
+
+IMAGE="ghcr.io/edepree/pie-pan:latest"
+DETACHED=0
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            usage
+            ;;
+        -n|--name)
+            [[ $# -lt 2 ]] && { echo "Error: $1 requires a value." >&2; exit 1; }
+            NAME="$2"
+            shift
+            ;;
+        -r|--router)
+            [[ $# -lt 2 ]] && { echo "Error: $1 requires a value." >&2; exit 1; }
+            ROUTER="$2"
+            shift
+            ;;
+        -c|--container)
+            [[ $# -lt 2 ]] && { echo "Error: $1 requires a value." >&2; exit 1; }
+            IMAGE="$2"
+            shift
+            ;;
+        -d|--detached)
+            DETACHED=1
+            ;;
+        *)
+            echo "Error: Unknown argument: $1" >&2
+            echo "Run 'pie-pan --help' for usage." >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+EXTERNAL_DIRECTORY=$(pwd)
+
+# container name
+if [[ -n "$NAME" ]]; then
+    CONTAINER_ID="pie-pan-${NAME}"
+else
+    CONTAINER_ID="pie-pan-$(shuf -i 10000-99999 -n 1)"
+fi
+
+echo "Starting: ${CONTAINER_ID}"
+echo "Directory: ${EXTERNAL_DIRECTORY}"
+echo "Container: ${IMAGE}"
+
+PODMAN_ARGS=(
+    --interactive
+    --tty
+    --rm
+    --name "${CONTAINER_ID}"
+    --volume "$EXTERNAL_DIRECTORY:/external:Z"
+    --workdir "/external"
+)
+
+if [[ -n "$ROUTER" ]]; then
+    PODMAN_ARGS+=(--env "MODEL_ROUTER=${ROUTER}")
+    echo "Router: ${ROUTER}"
+fi
+
+# run container
+if [[ "$DETACHED" -eq 1 ]]; then
+    echo "Starting detached container..."
+    podman run --detach "${PODMAN_ARGS[@]}" "$IMAGE" sleep infinity
+else
+    echo "Starting interactive session..."
+    podman run "${PODMAN_ARGS[@]}" "$IMAGE" bash
+fi
