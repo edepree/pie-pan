@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# current pie-pan version; stamped when released
+VERSION="${PIE_PAN_VERSION:-}"
+
+# container selection logic; use a pinned version or latest if undefined
+if [[ -n "$VERSION" ]]; then
+    DISPLAY_VERSION="v${VERSION}"
+    IMAGE="ghcr.io/edepree/pie-pan:${DISPLAY_VERSION}"
+else
+    DISPLAY_VERSION="latest"
+    IMAGE="ghcr.io/edepree/pie-pan:latest"
+fi
+
 usage() {
     cat <<EOF
 Usage: pie-pan [OPTIONS]
 
 Run the pie-pan container from the current directory.
+
+Version: ${DISPLAY_VERSION}
+Container: ${IMAGE}
 
 Options:
   -n, --name NAME         Container name suffix (creates pie-pan-NAME)
@@ -16,6 +31,7 @@ Options:
 
 Environment:
   PIE_PAN_MODEL_ROUTER    Default router to pass as MODEL_ROUTER inside the container
+  PIE_PAN_VERSION         Override version used for container image tag
 
 Examples:
   pie-pan
@@ -34,7 +50,6 @@ NAME=""
 # default from environment; CLI flag can override
 ROUTER="${PIE_PAN_MODEL_ROUTER:-}"
 
-IMAGE="ghcr.io/edepree/pie-pan:latest"
 DETACHED=0
 
 while [[ $# -gt 0 ]]; do
@@ -80,7 +95,6 @@ fi
 
 echo "Starting: ${CONTAINER_ID}"
 echo "Directory: ${EXTERNAL_DIRECTORY}"
-echo "Container: ${IMAGE}"
 
 PODMAN_ARGS=(
     --interactive

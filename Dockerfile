@@ -8,19 +8,21 @@ LABEL org.opencontainers.image.description="A Container for Pi" \
 # operating system packages
 RUN apk add --no-cache \
         bash \
-        bun \
         curl \
         fd \
         git \
         jq \
         nodejs \
+        npm \
         python3 \
         ripgrep \
         uv
 
 # nodejs packages
-ENV PATH="~/.bun/bin:${PATH}"
-RUN bun add -g --ignore-scripts @earendil-works/pi-coding-agent
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+
+# pi packages
+RUN pi install git:github.com/obra/superpowers
 
 # pi settings
 COPY --chmod=755 pi/settings.json ~/.pi/agent/settings.json

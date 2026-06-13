@@ -27,6 +27,10 @@ jobs:
           VERSION=$(tr -d '\n' < version.txt)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Stamp pie-pan Version
+        run: |
+          sed -i "s|^VERSION=\".*\"|VERSION=\"${{ steps.version.outputs.version }}\"|" pie-pan
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
