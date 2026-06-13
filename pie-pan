@@ -7,7 +7,7 @@ VERSION="${PIE_PAN_VERSION:-}"
 # container selection logic; use a pinned version or latest if undefined
 if [[ -n "$VERSION" ]]; then
     DISPLAY_VERSION="v${VERSION}"
-    IMAGE="ghcr.io/edepree/pie-pan:${DISPLAY_VERSION}"
+    IMAGE="ghcr.io/edepree/pie-pan:${VERSION}"
 else
     DISPLAY_VERSION="latest"
     IMAGE="ghcr.io/edepree/pie-pan:latest"

@@ -50,6 +50,8 @@ jobs:
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v7
+        env:
+          DOCKER_BUILD_SUMMARY: false
         with:
           push: true
           tags: |
