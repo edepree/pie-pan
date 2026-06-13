@@ -7,8 +7,7 @@ A containerized coding agent powered by [pi-coding-agent](https://github.com/ear
 ```bash
 # download the helper script
 mkdir -p ~/.local/bin
-curl -fsSL -o ~/.local/bin/pie-pan \
-  https://github.com/edepree/pie-pan/releases/download/latest/pie-pan
+curl -fsSL -o ~/.local/bin/pie-pan https://github.com/edepree/pie-pan/releases/latest/download/pie-pan
 chmod +x ~/.local/bin/pie-pan
 
 # start an interactive session in your current directory
