@@ -1,6 +1,6 @@
 # pie-pan
 
-A containerized coding agent powered by [pi-coding-agent](https://github.com/earendil-works/pi-coding-agent). Run an AI-powered coding assistant in an isolated container with your entire project attached.
+A container for running the [pi-coding-agent](https://github.com/earendil-works/pi-coding-agent) against OpenAI compatible inference endpoints; specifically [llama.cpp](https://github.com/ggml-org/llama.cpp). The container provides the base tooling for Pi along with a custom entrypoint to discover models from the OpenAI endpoint and dynamically create a `models.json` file for them.
 
 ## Quick Start
 
@@ -10,53 +10,38 @@ mkdir -p ~/.local/bin
 curl -fsSL -o ~/.local/bin/pie-pan https://github.com/edepree/pie-pan/releases/latest/download/pie-pan
 chmod +x ~/.local/bin/pie-pan
 
-# start an interactive session in your current directory
+# start an interactive pi session in your current directory
 pie-pan
 ```
 
 ## Usage
 
-### Helper Script (`pie-pan`)
-
-The `pie-pan` wrapper makes it easy to run the container from any project directory:
-
-```bash
-# interactive session (default)
-pie-pan
-
-# named container
-pie-pan -n my-project
-
-# detached session (for background work)
-pie-pan --detached
-
-# Specify a model router
-pie-pan -r http://localhost:11434
-
-# Use a custom container image
-pie-pan -c ghcr.io/edepree/pie-pan:1.0.0
 ```
+Usage: pie-pan [OPTIONS]
 
-#### Options
+Run the pie-pan container from the current directory.
 
-| Flag | Description |
-|------|-------------|
-| `-n, --name NAME` | Container name suffix (creates `pie-pan-NAME`) |
-| `-r, --router VALUE` | Set `MODEL_ROUTER` inside the container |
-| `-c, --container IMAGE` | Custom container image to run |
-| `-d, --detached` | Run in background (`sleep infinity`) |
-| `-h, --help` | Show help message |
+Version: latest
+Container: ghcr.io/edepree/pie-pan:latest
 
-## Configuration
+Options:
+      --command PROGRAM   Program to run inside the container (Default: pi)
+      --container IMAGE   Container image to run
+  -d, --detached          Run container in background
+  -h, --help              Show this help message and exit
+  -n, --name NAME         Container name suffix (creates pie-pan-NAME)
+  -r, --router VALUE      Set MODEL_ROUTER inside the container (overrides PIE_PAN_MODEL_ROUTER)
 
-### Model Router
+Environment:
+  PIE_PAN_MODEL_ROUTER    Default router to pass as MODEL_ROUTER inside the container
+  PIE_PAN_VERSION         Override version used for container image tag
 
-`pie-pan` connects to an OpenAI-compatible model router at startup. The entrypoint automatically fetches the list of available models and configures the pi-coding-agent.
-
-Set the router URL via:
-- CLI Flag: `--router http://localhost:11434`
-- Environment Variable: `MODEL_ROUTER=http://localhost:11434`
-- Default Environment Variable: `PIE_PAN_MODEL_ROUTER`
+Examples:
+  pie-pan
+  pie-pan -n my-project
+  pie-pan --detached
+  pie-pan --command ghcr.io/example/pie-pan:latest --detached
+```
 
 ## Building
 
